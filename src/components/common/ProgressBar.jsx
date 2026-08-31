@@ -23,11 +23,15 @@ export const ProgressBar = () => {
       break;
     case EXPERIMENT_STEPS.DEMOGRAPHICS:
       stageLabel = 'Background Information';
-      progressPercent = 20;
+      progressPercent = 18;
+      break;
+    case EXPERIMENT_STEPS.MODALITY_SELECTION:
+      stageLabel = 'Select Presentation Format';
+      progressPercent = 25;
       break;
     case EXPERIMENT_STEPS.INSTRUCTIONS:
       stageLabel = 'Task Instructions';
-      progressPercent = 28;
+      progressPercent = 30;
       break;
     case EXPERIMENT_STEPS.PRACTICE_INTRO:
     case EXPERIMENT_STEPS.PRACTICE_FIXATION:

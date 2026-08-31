@@ -7,6 +7,7 @@ import { ProgressBar } from './components/common/ProgressBar';
 import { WelcomeScreen } from './components/experiment/WelcomeScreen';
 import { ConsentScreen } from './components/experiment/ConsentScreen';
 import { DemographicsScreen } from './components/experiment/DemographicsScreen';
+import { ModalitySelectionScreen } from './components/experiment/ModalitySelectionScreen';
 import { InstructionsScreen } from './components/experiment/InstructionsScreen';
 import { PracticeScreen } from './components/experiment/PracticeScreen';
 import { TrialRunner } from './components/experiment/TrialRunner';
@@ -31,6 +32,7 @@ const ExperimentRouter = ({ onOpenAdmin, isAdminView }) => {
         {currentStep === EXPERIMENT_STEPS.WELCOME && <WelcomeScreen />}
         {currentStep === EXPERIMENT_STEPS.CONSENT && <ConsentScreen />}
         {currentStep === EXPERIMENT_STEPS.DEMOGRAPHICS && <DemographicsScreen />}
+        {currentStep === EXPERIMENT_STEPS.MODALITY_SELECTION && <ModalitySelectionScreen />}
         {currentStep === EXPERIMENT_STEPS.INSTRUCTIONS && <InstructionsScreen />}
 
         {/* Practice Stages */}

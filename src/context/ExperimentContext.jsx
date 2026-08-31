@@ -10,6 +10,7 @@ export const EXPERIMENT_STEPS = {
   WELCOME: 'welcome',
   CONSENT: 'consent',
   DEMOGRAPHICS: 'demographics',
+  MODALITY_SELECTION: 'modality_selection',
   INSTRUCTIONS: 'instructions',
   PRACTICE_INTRO: 'practice_intro',
   PRACTICE_FIXATION: 'practice_fixation',
@@ -144,7 +145,7 @@ export const ExperimentProvider = ({ children }) => {
     return true;
   };
 
-  // --- Step 3: Demographics & Random Assignment ---
+  // --- Step 3: Demographics & Move to Modality Selection ---
   const submitDemographics = (demoData) => {
     setDemographics(demoData);
 
@@ -154,13 +155,9 @@ export const ExperimentProvider = ({ children }) => {
     const eligStatus = isPrimaryEligible ? 'Eligible for primary analysis' : 'Not eligible for primary analysis';
     setEligibilityStatus(eligStatus);
 
-    // Stratified random assignment to Picture or Word condition
+    // Initial default condition allocation (participant will confirm or select on next screen)
     const assignedCondition = assignConditionForDiscipline(demoData.discipline);
     setAssignedModality(assignedCondition);
-
-    // Randomize experimental objects trial presentation order
-    const randomisedObjects = shuffleObjects(experimentalObjects);
-    setTrialOrder(randomisedObjects);
 
     // Persist participant preliminary record
     const pData = {
@@ -180,11 +177,44 @@ export const ExperimentProvider = ({ children }) => {
     storageService.saveParticipant(pData);
     googleSheetsService.syncToGoogleSheets({ type: 'participant', payload: pData }).catch(() => {});
 
-    setCurrentStep(EXPERIMENT_STEPS.INSTRUCTIONS);
+    setCurrentStep(EXPERIMENT_STEPS.MODALITY_SELECTION);
     persistSession({
       demographics: demoData,
       eligibilityStatus: eligStatus,
       assignedModality: assignedCondition,
+      currentStep: EXPERIMENT_STEPS.MODALITY_SELECTION
+    });
+  };
+
+  // --- Step 4: Modality Format Selection (Word or Picture) ---
+  const selectModality = (chosenModality) => {
+    setAssignedModality(chosenModality);
+
+    // Randomize experimental objects trial presentation order
+    const randomisedObjects = shuffleObjects(experimentalObjects);
+    setTrialOrder(randomisedObjects);
+
+    // Update participant record with confirmed presentation modality
+    const pData = {
+      participant_id: participantId,
+      age: demographics.age,
+      discipline: demographics.discipline,
+      discipline_specified: demographics.discipline_specified || '',
+      study_level: demographics.study_level,
+      study_year_semester: demographics.study_year_semester || '',
+      visual_arts_training: demographics.visual_arts_training,
+      visual_arts_training_details: demographics.visual_arts_training_details || '',
+      creative_activity_frequency: demographics.creative_activity_frequency,
+      assigned_modality: chosenModality,
+      eligibility_status: eligibilityStatus,
+      completion_status: 'In Progress'
+    };
+    storageService.saveParticipant(pData);
+    googleSheetsService.syncToGoogleSheets({ type: 'participant', payload: pData }).catch(() => {});
+
+    setCurrentStep(EXPERIMENT_STEPS.INSTRUCTIONS);
+    persistSession({
+      assignedModality: chosenModality,
       trialOrder: randomisedObjects,
       currentStep: EXPERIMENT_STEPS.INSTRUCTIONS
     });
@@ -487,6 +517,7 @@ export const ExperimentProvider = ({ children }) => {
         startExperiment,
         submitConsent,
         submitDemographics,
+        selectModality,
         startPractice,
         recordPracticeFirstResponseRender,
         submitPracticeFirstResponse,

@@ -3,14 +3,21 @@ import { useExperiment } from '../../context/ExperimentContext';
 import { BookOpen, ArrowRight, Lightbulb, Zap, Clock } from 'lucide-react';
 
 export const InstructionsScreen = () => {
-  const { startPractice } = useExperiment();
+  const { startPractice, assignedModality } = useExperiment();
 
   return (
     <div className="max-w-2xl mx-auto py-6 px-4">
       <div className="research-card-lg p-8 sm:p-10">
-        <div className="flex items-center gap-2 text-slate-500 text-xs font-semibold uppercase tracking-wider mb-2">
-          <BookOpen className="w-4 h-4" />
-          <span>Section 2 of 3</span>
+        <div className="flex items-center justify-between text-slate-500 text-xs font-semibold uppercase tracking-wider mb-2">
+          <div className="flex items-center gap-2">
+            <BookOpen className="w-4 h-4" />
+            <span>Task Instructions</span>
+          </div>
+          {assignedModality && (
+            <span className="bg-indigo-50 text-indigo-700 font-semibold px-2 py-0.5 rounded border border-indigo-100 normal-case">
+              Format: {assignedModality}
+            </span>
+          )}
         </div>
 
         <h2 className="text-2xl font-bold text-slate-900 mb-6 tracking-tight">
