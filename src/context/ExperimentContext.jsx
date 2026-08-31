@@ -472,7 +472,17 @@ export const ExperimentProvider = ({ children }) => {
     };
 
     storageService.saveParticipant(finalParticipant);
+
+    // 1. Send final participant record
     googleSheetsService.syncToGoogleSheets({ type: 'participant', payload: finalParticipant }).catch(() => {});
+
+    // 2. Automatically sync all session trials, responses, and participants in the background
+    googleSheetsService.syncAllLocalData(
+      storageService.getParticipants(),
+      storageService.getTrials(),
+      storageService.getResponses()
+    ).catch(() => {});
+
     storageService.clearActiveSession();
     setCurrentStep(EXPERIMENT_STEPS.COMPLETION);
   };

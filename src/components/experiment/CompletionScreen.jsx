@@ -20,15 +20,20 @@ export const CompletionScreen = () => {
         </p>
 
         <div className="bg-slate-50 border border-slate-200 rounded-lg p-6 max-w-sm mx-auto mb-8 text-left">
-          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">
-            <ShieldCheck className="w-4 h-4 text-slate-500" />
-            <span>Anonymous Participant Verification</span>
+          <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">
+            <div className="flex items-center gap-1.5">
+              <ShieldCheck className="w-4 h-4 text-slate-500" />
+              <span>Participant Verification</span>
+            </div>
+            <span className="text-[10px] text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded font-normal normal-case">
+              Auto-Synced to Database
+            </span>
           </div>
           <div className="font-mono text-xl font-bold text-slate-900 mt-1">
             ID: {participantId || 'P0001'}
           </div>
           <p className="text-xs text-slate-500 mt-2">
-            You may record this anonymous ID if needed for course credit or research verification.
+            Your responses and response times have been automatically saved to the study database.
           </p>
         </div>
 
