@@ -116,36 +116,17 @@ export const ExperimentProvider = ({ children }) => {
     storageService.saveActiveSession(session);
   };
 
-  // --- Step 1: Start Experiment from Welcome ---
+  // --- Step 1: Start Experiment from Welcome -> Demographics Form ---
   const startExperiment = () => {
     const newId = generateParticipantId();
     const now = new Date().toISOString();
     setParticipantId(newId);
     setStartTime(now);
-    setCurrentStep(EXPERIMENT_STEPS.CONSENT);
-    persistSession({ participantId: newId, startTime: now, currentStep: EXPERIMENT_STEPS.CONSENT });
-  };
-
-  // --- Step 2: Consent Decision ---
-  const submitConsent = (agreed) => {
-    if (!agreed) {
-      setConsentGiven(false);
-      // Ineligible due to lack of consent
-      const pData = {
-        participant_id: participantId,
-        eligibility_status: 'Ineligible - Consent declined',
-        completion_status: 'Declined Consent'
-      };
-      storageService.saveParticipant(pData);
-      return false;
-    }
-    setConsentGiven(true);
     setCurrentStep(EXPERIMENT_STEPS.DEMOGRAPHICS);
-    persistSession({ consentGiven: true, currentStep: EXPERIMENT_STEPS.DEMOGRAPHICS });
-    return true;
+    persistSession({ participantId: newId, startTime: now, currentStep: EXPERIMENT_STEPS.DEMOGRAPHICS });
   };
 
-  // --- Step 3: Demographics & Move to Modality Selection ---
+  // --- Step 2: Demographics (Personal Details) -> Move to Consent Form ---
   const submitDemographics = (demoData) => {
     setDemographics(demoData);
 
@@ -155,7 +136,7 @@ export const ExperimentProvider = ({ children }) => {
     const eligStatus = isPrimaryEligible ? 'Eligible for primary analysis' : 'Not eligible for primary analysis';
     setEligibilityStatus(eligStatus);
 
-    // Initial default condition allocation (participant will confirm or select on next screen)
+    // Initial default condition allocation (participant will confirm or select on modality screen)
     const assignedCondition = assignConditionForDiscipline(demoData.discipline);
     setAssignedModality(assignedCondition);
 
@@ -177,13 +158,43 @@ export const ExperimentProvider = ({ children }) => {
     storageService.saveParticipant(pData);
     googleSheetsService.syncToGoogleSheets({ type: 'participant', payload: pData }).catch(() => {});
 
-    setCurrentStep(EXPERIMENT_STEPS.MODALITY_SELECTION);
+    setCurrentStep(EXPERIMENT_STEPS.CONSENT);
     persistSession({
       demographics: demoData,
       eligibilityStatus: eligStatus,
       assignedModality: assignedCondition,
-      currentStep: EXPERIMENT_STEPS.MODALITY_SELECTION
+      currentStep: EXPERIMENT_STEPS.CONSENT
     });
+  };
+
+  // --- Step 3: Consent Decision -> Move to Presentation Format Selection ---
+  const submitConsent = (agreed) => {
+    if (!agreed) {
+      setConsentGiven(false);
+      // Ineligible due to lack of consent
+      const pData = {
+        participant_id: participantId,
+        age: demographics.age,
+        discipline: demographics.discipline,
+        discipline_specified: demographics.discipline_specified || '',
+        study_level: demographics.study_level,
+        study_year_semester: demographics.study_year_semester || '',
+        visual_arts_training: demographics.visual_arts_training,
+        visual_arts_training_details: demographics.visual_arts_training_details || '',
+        creative_activity_frequency: demographics.creative_activity_frequency,
+        assigned_modality: assignedModality || 'Unassigned',
+        eligibility_status: 'Ineligible - Consent declined',
+        completion_status: 'Declined Consent'
+      };
+      storageService.saveParticipant(pData);
+      googleSheetsService.syncToGoogleSheets({ type: 'participant', payload: pData }).catch(() => {});
+      return false;
+    }
+
+    setConsentGiven(true);
+    setCurrentStep(EXPERIMENT_STEPS.MODALITY_SELECTION);
+    persistSession({ consentGiven: true, currentStep: EXPERIMENT_STEPS.MODALITY_SELECTION });
+    return true;
   };
 
   // --- Step 4: Modality Format Selection (Word or Picture) ---

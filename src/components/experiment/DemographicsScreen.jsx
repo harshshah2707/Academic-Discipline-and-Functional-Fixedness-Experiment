@@ -276,7 +276,7 @@ export const DemographicsScreen = () => {
               type="submit"
               className="btn-primary w-full sm:w-auto"
             >
-              <span>Continue to Instructions</span>
+              <span>Continue to Consent Form</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>
