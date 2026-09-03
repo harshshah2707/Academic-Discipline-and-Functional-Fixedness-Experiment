@@ -37,48 +37,51 @@ export const exportService = {
     const headers = [
       'participant_id',
       'age',
-      'discipline',
+      'gender',
+      'academic_discipline',
       'discipline_specified',
-      'study_level',
-      'study_year_semester',
-      'visual_arts_training',
-      'visual_arts_training_details',
-      'creative_activity_frequency',
+      'year_of_study',
+      'previous_visual_arts_training',
+      'years_of_visual_arts_training',
       'assigned_modality',
       'eligibility_status',
+      'familiarity_ratings',
+      'cognitive_strategy',
       'instruction_understanding',
       'technical_problems',
       'technical_problems_details',
       'prior_knowledge_of_functional_fixedness',
       'external_help_used',
       'completion_status',
-      'is_excluded_by_researcher',
-      'session_start_time',
-      'session_end_time'
+      'date_and_time',
+      'completed_at'
     ];
 
-    const rows = participants.map(p => [
-      escapeCsv(p.participant_id),
-      escapeCsv(p.age),
-      escapeCsv(p.discipline),
-      escapeCsv(p.discipline_specified || ''),
-      escapeCsv(p.study_level),
-      escapeCsv(p.study_year_semester || ''),
-      escapeCsv(p.visual_arts_training),
-      escapeCsv(p.visual_arts_training_details || ''),
-      escapeCsv(p.creative_activity_frequency),
-      escapeCsv(p.assigned_modality),
-      escapeCsv(p.eligibility_status),
-      escapeCsv(p.instruction_understanding || ''),
-      escapeCsv(p.technical_problems || ''),
-      escapeCsv(p.technical_problems_details || ''),
-      escapeCsv(p.prior_knowledge_of_functional_fixedness || ''),
-      escapeCsv(p.external_help_used || ''),
-      escapeCsv(p.completion_status || 'Incomplete'),
-      escapeCsv(p.is_excluded_by_researcher ? 'Yes' : 'No'),
-      escapeCsv(p.created_at || ''),
-      escapeCsv(p.completed_at || '')
-    ].join(','));
+    const rows = participants.map(p => {
+      const famStr = typeof p.familiarity_ratings === 'object' ? JSON.stringify(p.familiarity_ratings) : (p.familiarity_ratings || '');
+      return [
+        escapeCsv(p.participant_id),
+        escapeCsv(p.age),
+        escapeCsv(p.gender || ''),
+        escapeCsv(p.discipline || p.academic_discipline || ''),
+        escapeCsv(p.discipline_specified || ''),
+        escapeCsv(p.study_year || p.study_level || p.study_year_semester || ''),
+        escapeCsv(p.visual_arts_training || p.previous_visual_arts_training || ''),
+        escapeCsv(p.visual_arts_training_years || p.years_of_visual_arts_training || p.visual_arts_training_details || ''),
+        escapeCsv(p.assigned_modality),
+        escapeCsv(p.eligibility_status),
+        escapeCsv(famStr),
+        escapeCsv(p.cognitive_strategy || ''),
+        escapeCsv(p.instruction_understanding || ''),
+        escapeCsv(p.technical_problems || ''),
+        escapeCsv(p.technical_problems_details || ''),
+        escapeCsv(p.prior_knowledge_of_functional_fixedness || ''),
+        escapeCsv(p.external_help_used || ''),
+        escapeCsv(p.completion_status || 'Incomplete'),
+        escapeCsv(p.created_at || ''),
+        escapeCsv(p.completed_at || '')
+      ].join(',');
+    });
 
     const csvContent = [headers.join(','), ...rows].join('\r\n');
     const timestamp = new Date().toISOString().slice(0, 10);
@@ -96,39 +99,60 @@ export const exportService = {
 
     const headers = [
       'participant_id',
-      'discipline',
+      'academic_discipline',
       'assigned_modality',
       'trial_number',
       'object_id',
       'object_name',
+      'object_order',
       'first_response',
       'first_response_latency_ms',
       'first_response_latency_seconds',
-      'no_response_flag',
-      'number_of_additional_uses',
-      'trial_completion_status',
-      'conventional_function_shown'
+      'all_additional_responses',
+      'number_of_additional_responses',
+      'total_number_of_responses',
+      'trial_completion_time',
+      'conventional_function_shown',
+      // Qualitative Coding Columns (Initial empty for coders)
+      'response_validity',
+      'response_type',
+      'canonical_related',
+      'property_based',
+      'novelty_rating',
+      'coder_1',
+      'coder_2'
     ];
+
+    const responses = storageService.getResponses();
 
     const rows = trials.map(t => {
       const p = partMap.get(t.participant_id) || {};
       const latencyMs = t.first_response_latency_ms != null ? t.first_response_latency_ms : '';
       const latencySec = t.first_response_latency_seconds != null ? t.first_response_latency_seconds : (latencyMs !== '' ? (latencyMs / 1000).toFixed(3) : '');
+      
+      const trialResponses = responses.filter(r => r.participant_id === t.participant_id && r.trial_number === t.trial_number);
+      const additionalResponses = trialResponses.filter(r => r.response_number > 1).map(r => r.response_text).join(' | ');
+      const numAdditional = t.number_of_additional_uses != null ? t.number_of_additional_uses : trialResponses.filter(r => r.response_number > 1).length;
+      const totalResponses = (t.first_response ? 1 : 0) + numAdditional;
 
       return [
         escapeCsv(t.participant_id),
-        escapeCsv(t.discipline || p.discipline || ''),
+        escapeCsv(t.discipline || p.discipline || p.academic_discipline || ''),
         escapeCsv(t.assigned_modality || p.assigned_modality || ''),
         escapeCsv(t.trial_number),
         escapeCsv(t.object_id),
         escapeCsv(t.object_name),
+        escapeCsv(t.trial_number),
         escapeCsv(t.first_response || ''),
         escapeCsv(latencyMs),
         escapeCsv(latencySec),
-        escapeCsv(t.no_response_flag ? 'True' : 'False'),
-        escapeCsv(t.number_of_additional_uses || 0),
-        escapeCsv(t.trial_completion_status || 'Completed'),
-        escapeCsv(t.conventional_function_shown !== false ? 'Yes' : 'No')
+        escapeCsv(additionalResponses),
+        escapeCsv(numAdditional),
+        escapeCsv(totalResponses),
+        escapeCsv(t.completed_at || t.trial_completion_status || 'Completed'),
+        escapeCsv(t.conventional_function_shown !== false ? 'Yes' : 'No'),
+        // Coding columns left empty for independent coders
+        '""', '""', '""', '""', '""', '""', '""'
       ].join(',');
     });
 
@@ -152,7 +176,14 @@ export const exportService = {
       'response_type',
       'response_text',
       'response_timestamp',
-      'response_time_from_trial_start'
+      'response_time_from_trial_start',
+      // Qualitative Coding Columns (Initial empty for coders)
+      'response_validity',
+      'canonical_related',
+      'property_based',
+      'novelty_rating',
+      'coder_1',
+      'coder_2'
     ];
 
     const rows = responses.map(r => [
@@ -164,7 +195,8 @@ export const exportService = {
       escapeCsv(r.response_type),
       escapeCsv(r.response_text),
       escapeCsv(r.response_timestamp),
-      escapeCsv(r.response_time_from_trial_start)
+      escapeCsv(r.response_time_from_trial_start),
+      '""', '""', '""', '""', '""', '""'
     ].join(','));
 
     const csvContent = [headers.join(','), ...rows].join('\r\n');

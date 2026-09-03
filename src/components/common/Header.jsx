@@ -1,9 +1,9 @@
 import React from 'react';
 import { useExperiment, EXPERIMENT_STEPS } from '../../context/ExperimentContext';
 import { useConfig } from '../../context/ConfigContext';
-import { ShieldCheck, UserCheck, Settings } from 'lucide-react';
+import { ShieldCheck, UserCheck, Settings, Sparkles } from 'lucide-react';
 
-export const Header = ({ onOpenAdmin, isAdminView = false }) => {
+export const Header = ({ onOpenAdmin, isAdminView = false, onToggleDemo, isDemoOpen = false }) => {
   const { participantId, currentStep } = useExperiment();
   const { settings } = useConfig();
 
@@ -26,13 +26,27 @@ export const Header = ({ onOpenAdmin, isAdminView = false }) => {
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           {participantId && isExperimentActive && (
-            <div className="flex items-center gap-1.5 px-2.5 py-1 bg-slate-100 border border-slate-200 rounded text-xs font-mono text-slate-700">
+            <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 bg-slate-100 border border-slate-200 rounded text-xs font-mono text-slate-700">
               <UserCheck className="w-3.5 h-3.5 text-slate-500" />
               <span>ID: <strong>{participantId}</strong></span>
             </div>
           )}
+
+          {/* Demo Mode Switcher Button */}
+          <button
+            onClick={onToggleDemo}
+            className={`text-xs px-3 py-1.5 rounded-lg border font-semibold transition-all flex items-center gap-1.5 shadow-xs ${
+              isDemoOpen
+                ? 'bg-indigo-600 text-white border-indigo-700 ring-2 ring-indigo-300'
+                : 'bg-indigo-50 text-indigo-700 border-indigo-200 hover:bg-indigo-100'
+            }`}
+            title="Toggle Demo Mode & Section Switcher for Mentor Presentation"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+            <span>{isDemoOpen ? 'Hide Demo Nav' : 'Demo Mode'}</span>
+          </button>
 
           <button
             onClick={onOpenAdmin}
@@ -44,7 +58,7 @@ export const Header = ({ onOpenAdmin, isAdminView = false }) => {
             title="Researcher Administration Panel"
           >
             <Settings className="w-3.5 h-3.5" />
-            <span>{isAdminView ? 'Exit Researcher Panel' : 'Researcher Access'}</span>
+            <span>{isAdminView ? 'Exit Panel' : 'Researcher Access'}</span>
           </button>
         </div>
       </div>

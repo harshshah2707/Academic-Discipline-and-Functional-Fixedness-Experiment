@@ -159,6 +159,20 @@ export const StimulusSvg = ({ name, className = "w-64 h-64 mx-auto" }) => {
     );
   }
 
+  if (normName === 'button') {
+    return (
+      <svg className={className} viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Button stimulus">
+        <circle cx="100" cy="100" r="75" fill="#E2E8F0" stroke="#334155" strokeWidth="6" />
+        <circle cx="100" cy="100" r="55" fill="#CBD5E1" stroke="#64748B" strokeWidth="3" strokeDasharray="6 4" />
+        <circle cx="80" cy="80" r="9" fill="#334155" />
+        <circle cx="120" cy="80" r="9" fill="#334155" />
+        <circle cx="80" cy="120" r="9" fill="#334155" />
+        <circle cx="120" cy="120" r="9" fill="#334155" />
+        <path d="M 80 80 L 120 120 M 120 80 L 80 120" stroke="#F8FAFC" strokeWidth="3" strokeLinecap="round" />
+      </svg>
+    );
+  }
+
   return (
     <div className={`${className} flex flex-col items-center justify-center bg-slate-100 border-2 border-slate-300 rounded-lg p-6 text-center`}>
       <span className="text-5xl mb-2">📦</span>

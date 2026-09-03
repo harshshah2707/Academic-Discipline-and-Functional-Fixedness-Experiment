@@ -7,13 +7,16 @@ export const DemographicsScreen = () => {
 
   const [formData, setFormData] = useState({
     age: '',
+    gender: '',
+    gender_self_describe: '',
     discipline: '',
     discipline_specified: '',
     study_level: '',
-    study_year_semester: '',
+    study_year: 'First Year',
     visual_arts_training: '',
+    visual_arts_training_years: '',
     visual_arts_training_details: '',
-    creative_activity_frequency: ''
+    creative_activity_frequency: 'Occasionally'
   });
 
   const [error, setError] = useState('');
@@ -46,9 +49,9 @@ export const DemographicsScreen = () => {
       return;
     }
 
-    // 3. Study Level Validation
-    if (!formData.study_level) {
-      setError('Please select your current level of study.');
+    // 3. Year of Study Validation
+    if (!formData.study_year) {
+      setError('Please select your current year of study.');
       return;
     }
 
@@ -57,14 +60,8 @@ export const DemographicsScreen = () => {
       setError('Please indicate whether you have received formal visual arts training.');
       return;
     }
-    if (formData.visual_arts_training === 'Yes' && !formData.visual_arts_training_details.trim()) {
-      setError('Please briefly describe your visual arts training.');
-      return;
-    }
-
-    // 5. Creative Activity Frequency Validation
-    if (!formData.creative_activity_frequency) {
-      setError('Please select your creative activity frequency.');
+    if (formData.visual_arts_training === 'Yes' && !formData.visual_arts_training_years.trim() && !formData.visual_arts_training_details.trim()) {
+      setError('Please indicate approximately how many years of formal visual arts training you received.');
       return;
     }
 
@@ -76,14 +73,14 @@ export const DemographicsScreen = () => {
       <div className="research-card-lg p-8 sm:p-10">
         <div className="flex items-center gap-2 text-slate-500 text-xs font-semibold uppercase tracking-wider mb-2">
           <UserCheck className="w-4 h-4" />
-          <span>Section 1 of 3</span>
+          <span>Demographic Information</span>
         </div>
 
         <h2 className="text-2xl font-bold text-slate-900 mb-2 tracking-tight">
           Demographic Questionnaire
         </h2>
         <p className="text-slate-600 text-sm mb-6">
-          Please answer the following background questions accurately.
+          Please provide your background information. All data is anonymous.
         </p>
 
         {error && (
@@ -110,37 +107,76 @@ export const DemographicsScreen = () => {
               className="form-input max-w-xs"
               required
             />
-            <p className="text-xs text-slate-500 mt-1">Participants must be at least 18 years old.</p>
+            <p className="text-xs text-slate-500 mt-1">Numeric input (18+).</p>
           </div>
 
-          {/* Question 2: Academic Discipline */}
+          {/* Question 2: Gender (Optional) */}
           <div className="p-4 bg-slate-50 border border-slate-200 rounded-lg">
             <label className="block font-semibold text-slate-900 mb-2">
-              2. Current Academic Discipline / Major: <span className="text-red-500">*</span>
+              2. Gender: <span className="text-xs font-normal text-slate-500">(Optional)</span>
             </label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {['Woman', 'Man', 'Non-binary', 'Prefer not to say', 'Prefer to self-describe'].map((g) => (
+                <label key={g} className={`form-radio-label ${formData.gender === g ? 'selected' : ''}`}>
+                  <input
+                    type="radio"
+                    name="gender"
+                    value={g}
+                    checked={formData.gender === g}
+                    onChange={(e) => handleChange('gender', e.target.value)}
+                    className="mr-2.5"
+                  />
+                  <span>{g}</span>
+                </label>
+              ))}
+            </div>
+
+            {formData.gender === 'Prefer to self-describe' && (
+              <div className="mt-2 pl-2">
+                <input
+                  type="text"
+                  placeholder="Please specify..."
+                  value={formData.gender_self_describe}
+                  onChange={(e) => handleChange('gender_self_describe', e.target.value)}
+                  className="form-input"
+                />
+              </div>
+            )}
+          </div>
+
+          {/* Question 3: Academic Discipline (Factorial Variable 1) */}
+          <div className="p-4 bg-slate-50 border border-slate-200 rounded-lg">
+            <div className="flex items-center justify-between mb-2">
+              <label className="block font-semibold text-slate-900">
+                3. Academic Discipline / Programme: <span className="text-red-500">*</span>
+              </label>
+              <span className="text-[11px] bg-blue-100 text-blue-800 font-semibold px-2 py-0.5 rounded">
+                Required
+              </span>
+            </div>
             <div className="space-y-2">
-              <label className={`form-radio-label ${formData.discipline === 'Fine Arts / Visual Arts' ? 'selected' : ''}`}>
+              <label className={`form-radio-label ${formData.discipline === 'Fine Arts' ? 'selected' : ''}`}>
                 <input
                   type="radio"
                   name="discipline"
-                  value="Fine Arts / Visual Arts"
-                  checked={formData.discipline === 'Fine Arts / Visual Arts'}
+                  value="Fine Arts"
+                  checked={formData.discipline === 'Fine Arts'}
                   onChange={(e) => handleChange('discipline', e.target.value)}
                   className="mr-3"
                 />
-                <span>Fine Arts / Visual Arts</span>
+                <span className="font-medium text-slate-900">Fine Arts</span>
               </label>
 
-              <label className={`form-radio-label ${formData.discipline === 'History' ? 'selected' : ''}`}>
+              <label className={`form-radio-label ${formData.discipline === 'Commerce' ? 'selected' : ''}`}>
                 <input
                   type="radio"
                   name="discipline"
-                  value="History"
-                  checked={formData.discipline === 'History'}
+                  value="Commerce"
+                  checked={formData.discipline === 'Commerce'}
                   onChange={(e) => handleChange('discipline', e.target.value)}
                   className="mr-3"
                 />
-                <span>History</span>
+                <span className="font-medium text-slate-900">Commerce</span>
               </label>
 
               <label className={`form-radio-label ${formData.discipline === 'Other' ? 'selected' : ''}`}>
@@ -159,12 +195,12 @@ export const DemographicsScreen = () => {
             {formData.discipline === 'Other' && (
               <div className="mt-3 pl-2">
                 <label htmlFor="other_discipline" className="block text-xs font-medium text-slate-700 mb-1">
-                  Please specify your academic discipline: <span className="text-red-500">*</span>
+                  Please specify your discipline / major: <span className="text-red-500">*</span>
                 </label>
                 <input
                   id="other_discipline"
                   type="text"
-                  placeholder="e.g. Psychology, Biology, Literature..."
+                  placeholder="e.g. Science, Engineering, Humanities..."
                   value={formData.discipline_specified}
                   onChange={(e) => handleChange('discipline_specified', e.target.value)}
                   className="form-input"
@@ -174,46 +210,32 @@ export const DemographicsScreen = () => {
             )}
           </div>
 
-          {/* Question 3: Study Level */}
+          {/* Question 4: Year of Study */}
           <div className="p-4 bg-slate-50 border border-slate-200 rounded-lg">
             <label className="block font-semibold text-slate-900 mb-2">
-              3. Level of Study: <span className="text-red-500">*</span>
+              4. Year of Study: <span className="text-red-500">*</span>
             </label>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-3">
-              {['Undergraduate', 'Postgraduate', 'Other'].map((lvl) => (
-                <label key={lvl} className={`form-radio-label ${formData.study_level === lvl ? 'selected' : ''}`}>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              {['First Year', 'Second Year', 'Third Year', 'Fourth Year', 'Postgraduate', 'Other'].map((yr) => (
+                <label key={yr} className={`form-radio-label ${formData.study_year === yr ? 'selected' : ''}`}>
                   <input
                     type="radio"
-                    name="study_level"
-                    value={lvl}
-                    checked={formData.study_level === lvl}
-                    onChange={(e) => handleChange('study_level', e.target.value)}
-                    className="mr-2.5"
+                    name="study_year"
+                    value={yr}
+                    checked={formData.study_year === yr}
+                    onChange={(e) => handleChange('study_year', e.target.value)}
+                    className="mr-2"
                   />
-                  <span>{lvl}</span>
+                  <span>{yr}</span>
                 </label>
               ))}
             </div>
-
-            <div>
-              <label htmlFor="study_year" className="block text-xs font-medium text-slate-700 mb-1">
-                Which year or semester of your programme are you currently studying in? (Optional)
-              </label>
-              <input
-                id="study_year"
-                type="text"
-                placeholder="e.g. Year 2, Semester 1, Final Year"
-                value={formData.study_year_semester}
-                onChange={(e) => handleChange('study_year_semester', e.target.value)}
-                className="form-input"
-              />
-            </div>
           </div>
 
-          {/* Question 4: Formal Visual Arts Training */}
+          {/* Question 5: Formal Visual Arts Training */}
           <div className="p-4 bg-slate-50 border border-slate-200 rounded-lg">
             <label className="block font-semibold text-slate-900 mb-2">
-              4. Have you received formal training in visual arts outside your current academic programme? <span className="text-red-500">*</span>
+              5. Have you received formal training in visual arts outside your current academic programme? <span className="text-red-500">*</span>
             </label>
             <div className="grid grid-cols-2 gap-3 mb-3">
               {['Yes', 'No'].map((ans) => (
@@ -232,43 +254,23 @@ export const DemographicsScreen = () => {
             </div>
 
             {formData.visual_arts_training === 'Yes' && (
-              <div className="mt-2 pl-2">
-                <label htmlFor="arts_training_details" className="block text-xs font-medium text-slate-700 mb-1">
-                  Please briefly describe the training: <span className="text-red-500">*</span>
-                </label>
-                <input
-                  id="arts_training_details"
-                  type="text"
-                  placeholder="e.g. 2 years of formal painting instruction, certificate in graphic design..."
-                  value={formData.visual_arts_training_details}
-                  onChange={(e) => handleChange('visual_arts_training_details', e.target.value)}
-                  className="form-input"
-                  required
-                />
+              <div className="mt-2 pl-2 space-y-2">
+                <div>
+                  <label htmlFor="arts_training_years" className="block text-xs font-medium text-slate-700 mb-1">
+                    Approximately how many years of formal visual arts training have you received? <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    id="arts_training_years"
+                    type="text"
+                    placeholder="e.g. 2 years"
+                    value={formData.visual_arts_training_years}
+                    onChange={(e) => handleChange('visual_arts_training_years', e.target.value)}
+                    className="form-input max-w-xs"
+                    required
+                  />
+                </div>
               </div>
             )}
-          </div>
-
-          {/* Question 5: Creative Activity Frequency */}
-          <div className="p-4 bg-slate-50 border border-slate-200 rounded-lg">
-            <label className="block font-semibold text-slate-900 mb-2">
-              5. How frequently do you engage in activities such as drawing, painting, design, sculpture, photography, or other visual creative activities? <span className="text-red-500">*</span>
-            </label>
-            <div className="space-y-1.5">
-              {['Never', 'Rarely', 'Occasionally', 'Often', 'Very Often'].map((freq) => (
-                <label key={freq} className={`form-radio-label ${formData.creative_activity_frequency === freq ? 'selected' : ''}`}>
-                  <input
-                    type="radio"
-                    name="creative_activity_frequency"
-                    value={freq}
-                    checked={formData.creative_activity_frequency === freq}
-                    onChange={(e) => handleChange('creative_activity_frequency', e.target.value)}
-                    className="mr-3"
-                  />
-                  <span>{freq}</span>
-                </label>
-              ))}
-            </div>
           </div>
 
           <div className="border-t border-slate-200 pt-6 flex justify-end">

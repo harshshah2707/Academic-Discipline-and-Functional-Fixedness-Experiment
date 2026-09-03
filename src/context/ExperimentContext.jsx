@@ -452,22 +452,31 @@ export const ExperimentProvider = ({ children }) => {
     const finalParticipant = {
       participant_id: participantId,
       age: demographics.age,
+      gender: demographics.gender || '',
+      gender_self_describe: demographics.gender_self_describe || '',
+      academic_discipline: demographics.discipline,
       discipline: demographics.discipline,
       discipline_specified: demographics.discipline_specified || '',
-      study_level: demographics.study_level,
-      study_year_semester: demographics.study_year_semester || '',
+      year_of_study: demographics.study_year || demographics.study_level || '',
+      study_level: demographics.study_level || '',
+      study_year_semester: demographics.study_year_semester || demographics.study_year || '',
+      previous_visual_arts_training: demographics.visual_arts_training,
       visual_arts_training: demographics.visual_arts_training,
-      visual_arts_training_details: demographics.visual_arts_training_details || '',
-      creative_activity_frequency: demographics.creative_activity_frequency,
+      years_of_visual_arts_training: demographics.visual_arts_training_years || demographics.visual_arts_training_details || '',
+      visual_arts_training_details: demographics.visual_arts_training_details || demographics.visual_arts_training_years || '',
+      creative_activity_frequency: demographics.creative_activity_frequency || '',
       assigned_modality: assignedModality,
       eligibility_status: eligibilityStatus,
-      instruction_understanding: postQuestions.instruction_understanding,
-      technical_problems: postQuestions.technical_problems,
+      familiarity_ratings: postQuestions.familiarity_ratings || {},
+      cognitive_strategy: postQuestions.cognitive_strategy || '',
+      instruction_understanding: postQuestions.instruction_understanding || '',
+      technical_problems: postQuestions.technical_problems || '',
       technical_problems_details: postQuestions.technical_problems_details || '',
-      prior_knowledge_of_functional_fixedness: postQuestions.prior_knowledge_of_functional_fixedness,
-      external_help_used: postQuestions.external_help_used,
+      prior_knowledge_of_functional_fixedness: postQuestions.prior_knowledge_of_functional_fixedness || '',
+      external_help_used: postQuestions.external_help_used || '',
       completion_status: 'Completed',
-      created_at: startTime,
+      date_and_time: startTime || new Date().toISOString(),
+      created_at: startTime || new Date().toISOString(),
       completed_at: endTimestamp
     };
 
@@ -487,19 +496,79 @@ export const ExperimentProvider = ({ children }) => {
     setCurrentStep(EXPERIMENT_STEPS.COMPLETION);
   };
 
+  // Demo Mode Navigation Helper
+  const jumpToStep = (targetStep, trialIdx = 0) => {
+    // If no participant ID exists yet, create one for preview
+    if (!participantId) {
+      const demoId = generateParticipantId();
+      setParticipantId(demoId);
+      setStartTime(new Date().toISOString());
+    }
+
+    // If modality not yet assigned, default to Picture Condition
+    if (!assignedModality) {
+      setAssignedModality(CONDITIONS.PICTURE);
+    }
+
+    // If trial order not yet generated, generate standard randomized order
+    if (!trialOrder || trialOrder.length === 0) {
+      setTrialOrder(experimentalObjects);
+    }
+
+    if (trialIdx !== undefined) {
+      setCurrentTrialIndex(trialIdx);
+    }
+
+    setCurrentStep(targetStep);
+  };
+
+  // Demo Mode Fill Sample Data Helper
+  const fillSampleData = (disciplineType = 'Fine Arts', modalityType = CONDITIONS.PICTURE) => {
+    const demoId = participantId || generateParticipantId();
+    setParticipantId(demoId);
+    setStartTime(new Date().toISOString());
+
+    const sampleDemo = {
+      age: '21',
+      gender: 'Woman',
+      discipline: disciplineType,
+      discipline_specified: '',
+      study_year: 'Second Year',
+      study_level: 'Undergraduate',
+      visual_arts_training: disciplineType === 'Fine Arts' ? 'Yes' : 'No',
+      visual_arts_training_years: disciplineType === 'Fine Arts' ? '3 years' : '',
+      visual_arts_training_details: disciplineType === 'Fine Arts' ? 'Formal studio arts & drawing training' : '',
+      creative_activity_frequency: disciplineType === 'Fine Arts' ? 'Often' : 'Occasionally'
+    };
+
+    setDemographics(sampleDemo);
+    setAssignedModality(modalityType);
+    setConsentGiven(true);
+    setTrialOrder(experimentalObjects);
+    setCurrentTrialIndex(0);
+
+    const eligStatus = disciplineType === 'Fine Arts' || disciplineType === 'Commerce'
+      ? 'Eligible for primary analysis'
+      : 'Not eligible for primary analysis';
+    setEligibilityStatus(eligStatus);
+  };
+
   // Restart clean session
   const restartNewSession = () => {
     storageService.clearActiveSession();
     setParticipantId('');
     setDemographics({
       age: '',
+      gender: '',
+      gender_self_describe: '',
       discipline: '',
       discipline_specified: '',
       study_level: '',
-      study_year_semester: '',
+      study_year: 'First Year',
       visual_arts_training: '',
+      visual_arts_training_years: '',
       visual_arts_training_details: '',
-      creative_activity_frequency: ''
+      creative_activity_frequency: 'Occasionally'
     });
     setAssignedModality(null);
     setEligibilityStatus('');
@@ -520,12 +589,14 @@ export const ExperimentProvider = ({ children }) => {
         participantId,
         demographics,
         assignedModality,
+        setAssignedModality,
         eligibilityStatus,
         consentGiven,
         startTime,
         completedTime,
         trialOrder,
         currentTrialIndex,
+        setCurrentTrialIndex,
         getCurrentTrialObject,
         firstResponseText,
         additionalResponses,
@@ -552,7 +623,10 @@ export const ExperimentProvider = ({ children }) => {
         resumeFromBreak,
         submitPostQuestions,
         finishStudy,
-        restartNewSession
+        restartNewSession,
+        // Demo Mode Actions
+        jumpToStep,
+        fillSampleData
       }}
     >
       {children}

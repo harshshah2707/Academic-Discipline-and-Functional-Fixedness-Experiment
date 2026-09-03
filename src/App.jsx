@@ -4,6 +4,7 @@ import { ExperimentProvider, useExperiment, EXPERIMENT_STEPS } from './context/E
 import { storageService } from './services/storageService';
 import { Header } from './components/common/Header';
 import { ProgressBar } from './components/common/ProgressBar';
+import { DemoModeBar } from './components/common/DemoModeBar';
 import { WelcomeScreen } from './components/experiment/WelcomeScreen';
 import { ConsentScreen } from './components/experiment/ConsentScreen';
 import { DemographicsScreen } from './components/experiment/DemographicsScreen';
@@ -18,12 +19,23 @@ import { CompletionScreen } from './components/experiment/CompletionScreen';
 import { AdminLogin } from './components/admin/AdminLogin';
 import { AdminDashboard } from './components/admin/AdminDashboard';
 
-const ExperimentRouter = ({ onOpenAdmin, isAdminView }) => {
+const ExperimentRouter = ({ onOpenAdmin, isAdminView, isDemoOpen, onToggleDemo }) => {
   const { currentStep } = useExperiment();
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50">
-      <Header onOpenAdmin={onOpenAdmin} isAdminView={isAdminView} />
+      <DemoModeBar
+        isOpen={isDemoOpen}
+        onToggle={onToggleDemo}
+        onOpenAdmin={onOpenAdmin}
+      />
+
+      <Header
+        onOpenAdmin={onOpenAdmin}
+        isAdminView={isAdminView}
+        isDemoOpen={isDemoOpen}
+        onToggleDemo={onToggleDemo}
+      />
 
       <main className="flex-1 py-4 sm:py-8">
         <ProgressBar />
@@ -75,6 +87,7 @@ const ExperimentRouter = ({ onOpenAdmin, isAdminView }) => {
 export default function App() {
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [isDemoOpen, setIsDemoOpen] = useState(false);
 
   const handleOpenAdmin = () => {
     if (isAdminOpen) {
@@ -100,13 +113,20 @@ export default function App() {
       <ExperimentProvider>
         {isAdminOpen ? (
           <div className="min-h-screen bg-slate-100">
-            <Header onOpenAdmin={() => setIsAdminOpen(false)} isAdminView={true} />
+            <Header
+              onOpenAdmin={() => setIsAdminOpen(false)}
+              isAdminView={true}
+              isDemoOpen={isDemoOpen}
+              onToggleDemo={() => setIsDemoOpen(prev => !prev)}
+            />
             <AdminDashboard onExit={() => setIsAdminOpen(false)} />
           </div>
         ) : (
           <ExperimentRouter
             onOpenAdmin={handleOpenAdmin}
             isAdminView={false}
+            isDemoOpen={isDemoOpen}
+            onToggleDemo={() => setIsDemoOpen(prev => !prev)}
           />
         )}
 

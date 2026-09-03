@@ -7,8 +7,24 @@ export const ConsentScreen = () => {
   const { submitConsent } = useExperiment();
   const { settings } = useConfig();
   const [declined, setDeclined] = useState(false);
+  const [checkboxes, setCheckboxes] = useState({
+    isAdult: false,
+    isVoluntary: false,
+    canStop: false,
+    givesConsent: false
+  });
+
+  const allChecked = checkboxes.isAdult && checkboxes.isVoluntary && checkboxes.canStop && checkboxes.givesConsent;
+
+  const handleCheckboxChange = (field) => {
+    setCheckboxes(prev => ({
+      ...prev,
+      [field]: !prev[field]
+    }));
+  };
 
   const handleAgree = () => {
+    if (!allChecked) return;
     submitConsent(true);
   };
 
@@ -47,11 +63,11 @@ export const ConsentScreen = () => {
           <span>Participant Information & Consent</span>
         </div>
 
-        <h2 className="text-2xl font-bold text-slate-900 mb-6 tracking-tight">
+        <h2 className="text-2xl font-bold text-slate-900 mb-4 tracking-tight">
           Informed Consent Form
         </h2>
 
-        <div className="space-y-4 text-slate-700 text-sm leading-relaxed mb-8 bg-slate-50 border border-slate-200 rounded-lg p-6 max-h-[380px] overflow-y-auto">
+        <div className="space-y-4 text-slate-700 text-sm leading-relaxed mb-6 bg-slate-50 border border-slate-200 rounded-lg p-6 max-h-[300px] overflow-y-auto">
           <p>
             Please read the following information carefully before deciding whether to take part in this research project:
           </p>
@@ -59,27 +75,27 @@ export const ConsentScreen = () => {
           <div className="space-y-3 pl-2">
             <div className="flex items-start gap-2">
               <span className="font-bold text-slate-900">•</span>
-              <p><strong>Voluntary Participation:</strong> Your participation in this study is entirely voluntary. You may withdraw or stop the experiment at any time without penalty.</p>
+              <p><strong>Voluntary Participation:</strong> Your participation in this study is entirely voluntary. You may withdraw or stop participating at any time before submitting your responses without penalty.</p>
             </div>
             
             <div className="flex items-start gap-2">
               <span className="font-bold text-slate-900">•</span>
-              <p><strong>Confidentiality & Anonymity:</strong> All responses will be treated confidentially. Data is recorded under an anonymous participant ID code. Please do not include personally identifying information (such as your full name or email) in any open text responses.</p>
+              <p><strong>Anonymous Data Collection:</strong> Responses are collected anonymously and recorded under a participant ID. There are no right or wrong answers.</p>
             </div>
 
             <div className="flex items-start gap-2">
               <span className="font-bold text-slate-900">•</span>
-              <p><strong>Study Procedure:</strong> The study involves viewing familiar everyday objects and typing alternative uses for them across a series of structured trials.</p>
+              <p><strong>Independent Responses:</strong> Please work independently and do not search for ideas online or ask others for suggestions during the study.</p>
             </div>
 
             <div className="flex items-start gap-2">
               <span className="font-bold text-slate-900">•</span>
-              <p><strong>Time Commitment:</strong> The study will take approximately <strong>{settings.estimatedTimeMin || '15–20'} minutes</strong> to complete.</p>
+              <p><strong>Time Commitment:</strong> The study should take approximately <strong>{settings.estimatedTimeMin || '10–15'} minutes</strong> to complete.</p>
             </div>
 
             <div className="flex items-start gap-2">
               <span className="font-bold text-slate-900">•</span>
-              <p><strong>Eligibility:</strong> Participants must be at least 18 years old to participate in this study.</p>
+              <p><strong>Eligibility:</strong> Participants must be at least 18 years old.</p>
             </div>
           </div>
 
@@ -88,21 +104,71 @@ export const ConsentScreen = () => {
           </p>
         </div>
 
+        {/* Mandatory Consent Checkboxes */}
+        <div className="bg-slate-100/80 border border-slate-200 rounded-lg p-4 mb-6 space-y-3">
+          <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">
+            Consent Declarations (All required to continue):
+          </h4>
+
+          <label className="flex items-center gap-3 cursor-pointer text-sm text-slate-800">
+            <input
+              type="checkbox"
+              checked={checkboxes.isAdult}
+              onChange={() => handleCheckboxChange('isAdult')}
+              className="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500"
+            />
+            <span>I am at least 18 years old.</span>
+          </label>
+
+          <label className="flex items-center gap-3 cursor-pointer text-sm text-slate-800">
+            <input
+              type="checkbox"
+              checked={checkboxes.isVoluntary}
+              onChange={() => handleCheckboxChange('isVoluntary')}
+              className="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500"
+            />
+            <span>I understand that my participation is voluntary.</span>
+          </label>
+
+          <label className="flex items-center gap-3 cursor-pointer text-sm text-slate-800">
+            <input
+              type="checkbox"
+              checked={checkboxes.canStop}
+              onChange={() => handleCheckboxChange('canStop')}
+              className="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500"
+            />
+            <span>I understand that I may stop participating before submitting my responses.</span>
+          </label>
+
+          <label className="flex items-center gap-3 cursor-pointer text-sm text-slate-800 font-medium">
+            <input
+              type="checkbox"
+              checked={checkboxes.givesConsent}
+              onChange={() => handleCheckboxChange('givesConsent')}
+              className="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500"
+            />
+            <span>I consent to participate in this study.</span>
+          </label>
+        </div>
+
         <div className="border-t border-slate-200 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <button
             onClick={handleDecline}
             className="btn-secondary w-full sm:w-auto text-sm order-2 sm:order-1"
           >
             <XCircle className="w-4 h-4 text-slate-400" />
-            <span>I Do Not Agree</span>
+            <span>I Do Not Consent</span>
           </button>
 
           <button
             onClick={handleAgree}
-            className="btn-primary w-full sm:w-auto text-sm order-1 sm:order-2"
+            disabled={!allChecked}
+            className={`btn-primary w-full sm:w-auto text-sm order-1 sm:order-2 ${
+              !allChecked ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
           >
             <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-            <span>I Agree and Wish to Participate</span>
+            <span>Continue</span>
           </button>
         </div>
       </div>

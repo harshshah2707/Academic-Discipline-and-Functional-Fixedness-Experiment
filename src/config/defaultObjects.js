@@ -3,11 +3,11 @@
  * Each object contains ID, display name, conventional function statement, and optional custom image URL.
  */
 export const PRACTICE_OBJECT = {
-  id: 'practice_coin',
-  name: 'COIN',
-  displayName: 'Coin',
+  id: 'practice_button',
+  name: 'BUTTON',
+  displayName: 'Button',
   imageUrl: '', // falls back to SVG
-  conventionalFunction: 'Coins are commonly used as currency to pay for goods and services.',
+  conventionalFunction: 'A button is commonly used to fasten pieces of fabric or clothing together.',
   isPractice: true
 };
 

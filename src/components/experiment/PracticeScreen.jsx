@@ -125,10 +125,10 @@ export const PracticeScreen = () => {
         </div>
         <div className="stimulus-box flex flex-col items-center justify-center">
           {assignedModality === CONDITIONS.PICTURE ? (
-            <StimulusSvg name="coin" className="w-56 h-56" />
+            <StimulusSvg name={practiceObject.name || 'button'} className="w-56 h-56" />
           ) : (
             <div className="text-4xl sm:text-5xl font-bold tracking-widest text-slate-900 uppercase">
-              COIN
+              {practiceObject.name || 'BUTTON'}
             </div>
           )}
         </div>
@@ -161,7 +161,7 @@ export const PracticeScreen = () => {
             <span className="bg-amber-100 text-amber-900 text-xs font-semibold px-2.5 py-1 rounded uppercase tracking-wider">
               Practice Trial: Phase 1
             </span>
-            <span className="text-xs text-slate-500 font-mono">Object: COIN</span>
+            <span className="text-xs text-slate-500 font-mono">Object: {practiceObject.name || 'BUTTON'}</span>
           </div>
 
           <h2 className="text-xl sm:text-2xl font-bold text-slate-900 mb-2">
